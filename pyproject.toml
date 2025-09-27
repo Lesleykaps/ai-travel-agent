@@ -2,9 +2,10 @@
 [tool.poetry]
 name = "ai-travel-agent"
 version = "0.1.1"
-description = ""
+description = "AI-powered travel planning agent with flight and hotel search capabilities"
 authors = ["Nir Bar"]
 readme = "README.md"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -17,6 +18,7 @@ mailgun = "^0.1.1"
 streamlit = "^1.38.0"
 serpapi = "^0.1.5"
 beautifulsoup4 = "^4.12.3"
+pyarrow = "^15.0.0"
 
 
 [build-system]
