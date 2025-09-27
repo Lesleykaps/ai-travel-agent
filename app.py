@@ -54,12 +54,19 @@ def render_custom_css():
 
 
 def _time_of_day():
-    hour = datetime.datetime.now().hour
-    if 5 <= hour < 12:
-        return 'morning'
-    if 12 <= hour < 18:
-        return 'afternoon'
-    return 'evening'
+    """Get time of day greeting based on current hour"""
+    try:
+        # Use UTC time for consistent behavior on Streamlit Cloud
+        hour = datetime.datetime.utcnow().hour
+        if 5 <= hour < 12:
+            return 'morning'
+        elif 12 <= hour < 18:
+            return 'afternoon'
+        else:
+            return 'evening'
+    except Exception:
+        # Fallback to a default greeting if there's any issue
+        return 'day'
 
 
 def render_ui():
@@ -74,7 +81,11 @@ def render_ui():
     # Greeting container with orb on top
     st.markdown('<div class="greeting-container" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 6px;">', unsafe_allow_html=True)
     st.markdown('<div class="orb"></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="greeting">Good {_time_of_day().title()}</div>', unsafe_allow_html=True)
+    
+    # Get time-based greeting with proper formatting
+    time_greeting = _time_of_day()
+    greeting_text = f"Good {time_greeting.capitalize()}"
+    st.markdown(f'<div class="greeting">{greeting_text}</div>', unsafe_allow_html=True)
     st.markdown('<div class="subtitle">Can I help you with anything?</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
