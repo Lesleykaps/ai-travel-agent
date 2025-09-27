@@ -1,6 +1,9 @@
 # pylint: disable = invalid-name
 import os
 import uuid
+import datetime
+import re
+import json
 
 import streamlit as st
 from langchain_core.messages import HumanMessage
@@ -8,23 +11,34 @@ from langchain_core.messages import HumanMessage
 from agents.agent import Agent
 
 
-def populate_envs(sender_email, receiver_email, subject):
-    os.environ['FROM_EMAIL'] = sender_email
-    os.environ['TO_EMAIL'] = receiver_email
-    os.environ['EMAIL_SUBJECT'] = subject
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+load_dotenv()
+ 
+def clean_html_content(content):
+    """Remove all HTML tags including pre tags and their content"""
+    if not content:
+        return content
+    
+    soup = BeautifulSoup(content, 'html.parser')
+    
+    # Remove pre tags
+    for pre in soup.find_all('pre'):
+        pre.decompose()
+        
+    # Get text
+    text = soup.get_text()
+    
+    # Remove code blocks (triple backticks)
+    text = re.sub(r'```[^`]*```', '', text, flags=re.DOTALL)
+    
+    # Remove single backticks
+    text = re.sub(r'`[^`]*`', '', text)
+    
+    return text.strip()
 
 
-def send_email(sender_email, receiver_email, subject, thread_id):
-    try:
-        populate_envs(sender_email, receiver_email, subject)
-        config = {'configurable': {'thread_id': thread_id}}
-        st.session_state.agent.graph.invoke(None, config=config)
-        st.success('Email sent successfully!')
-        # Clear session state
-        for key in ['travel_info', 'thread_id']:
-            st.session_state.pop(key, None)
-    except Exception as e:
-        st.error(f'Error sending email: {e}')
+
 
 
 def initialize_agent():
@@ -33,108 +47,738 @@ def initialize_agent():
 
 
 def render_custom_css():
-    st.markdown(
-        '''
-        <style>
-        .main-title {
-            font-size: 2.5em;
-            color: #333;
-            text-align: center;
-            margin-bottom: 0.5em;
-            font-weight: bold;
-        }
-        .sub-title {
-            font-size: 1.2em;
-            color: #333;
-            text-align: left;
-            margin-bottom: 0.5em;
-        }
-        .center-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        .query-box {
-            width: 80%;
-            max-width: 600px;
-            margin-top: 0.5em;
-            margin-bottom: 1em;
-        }
-        .query-container {
-            width: 80%;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        </style>
-        ''', unsafe_allow_html=True)
+    with open("style.css", "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+def _time_of_day():
+    hour = datetime.datetime.now().hour
+    if 5 <= hour < 12:
+        return 'morning'
+    if 12 <= hour < 18:
+        return 'afternoon'
+    return 'evening'
 
 
 def render_ui():
-    st.markdown('<div class="center-container">', unsafe_allow_html=True)
-    st.markdown('<div class="main-title">✈️🌍 AI Travel Agent 🏨🗺️</div>', unsafe_allow_html=True)
-    st.markdown('<div class="query-container">', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">Enter your travel query and get flight and hotel information:</div>', unsafe_allow_html=True)
+    # Wrapper
+    st.markdown('<div class="app-wrap">', unsafe_allow_html=True)
+
+    # Top navigation / Home button
+    st.markdown('<div style="display:flex; justify-content:center; margin-bottom:2px;">', unsafe_allow_html=True)
+    st.markdown('<a href="http://localhost:3000/" class="btn-link" target="_self" aria-label="Go to Home">⟵ Home</a>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Greeting container with orb on top
+    st.markdown('<div class="greeting-container" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 6px;">', unsafe_allow_html=True)
+    st.markdown('<div class="orb"></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="greeting">Good {_time_of_day().title()}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Can I help you with anything?</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Suggestion chips
+    suggestions = [
+        'Plan a round trip Madrid ↔ Amsterdam (Oct 1–7) and 4★ hotels',
+        'Weekend getaway from Berlin with flights + hotel under €300',
+    ]
+    st.markdown('<div class="chips">', unsafe_allow_html=True)
+    chip_cols = st.columns(min(4, len(suggestions)))
+    for i, text in enumerate(suggestions):
+        with chip_cols[i % len(chip_cols)]:
+            if st.button(text, key=f'chip_{i}'):
+                st.session_state.query = text
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Query input with enhanced accessibility
+    st.markdown('<div class="query-input-container" role="region" aria-labelledby="query-label">', unsafe_allow_html=True)
+    st.markdown('<label id="query-label" class="sr-only">Travel Query Input</label>', unsafe_allow_html=True)
     user_input = st.text_area(
         'Travel Query',
-        height=200,
+        height=140,
         key='query',
-        placeholder='Type your travel query here...',
+        placeholder='How can I help you today? Describe your trip or ask for suggestions…',
+        label_visibility='collapsed',
+        help='Enter your travel query. Press Ctrl+Enter to submit or Enter for a new line.'
     )
     st.markdown('</div>', unsafe_allow_html=True)
-    st.sidebar.image('images/ai-travel.png', caption='AI Travel Assistant')
 
-    return user_input
+    # Primary action button
+    st.markdown('<div class="primary-actions">', unsafe_allow_html=True)
+    submit_clicked = st.button('Get Travel Information', use_container_width=True, key='submit_btn')
+    st.markdown('</div>', unsafe_allow_html=True)
 
+    # JavaScript for Enter key functionality
+    st.markdown("""
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validation message functions
+        function showValidationMessage(message) {
+            clearValidationMessage();
+            const validationDiv = document.createElement('div');
+            validationDiv.id = 'validation-error';
+            validationDiv.className = 'validation-message error';
+            validationDiv.setAttribute('role', 'alert');
+            validationDiv.setAttribute('aria-live', 'polite');
+            validationDiv.textContent = message;
+            
+            const textArea = document.querySelector('textarea[aria-label="Travel Query"]');
+            if (textArea && textArea.parentNode) {
+                textArea.parentNode.appendChild(validationDiv);
+            }
+        }
+        
+        function clearValidationMessage() {
+            const existingMessage = document.getElementById('validation-error');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+        }
+        
+        // Function to handle Enter key press
+        function handleEnterKey() {
+            const textArea = document.querySelector('textarea[aria-label="Travel Query"]');
+            const submitButton = document.querySelector('button[kind="primary"]');
+            
+            if (textArea && submitButton) {
+                // Add ARIA attributes for accessibility
+                textArea.setAttribute('aria-describedby', 'enter-key-help');
+                textArea.setAttribute('role', 'textbox');
+                textArea.setAttribute('aria-multiline', 'true');
+                
+                // Add helper text for accessibility
+                if (!document.getElementById('enter-key-help')) {
+                    const helpText = document.createElement('div');
+                    helpText.id = 'enter-key-help';
+                    helpText.className = 'sr-only';
+                    helpText.textContent = 'Press Ctrl+Enter to submit, or Enter for new line';
+                    textArea.parentNode.appendChild(helpText);
+                }
+                
+                textArea.addEventListener('keydown', function(event) {
+                     // Ctrl+Enter or Cmd+Enter to submit (for accessibility and multi-line support)
+                     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                         event.preventDefault();
+                         
+                         // Enhanced validation before submission
+                         const inputValue = textArea.value.trim();
+                         
+                         // Check for empty input
+                         if (inputValue.length === 0) {
+                             textArea.setAttribute('aria-invalid', 'true');
+                             textArea.setAttribute('aria-describedby', 'enter-key-help validation-error');
+                             showValidationMessage('Please enter a travel query before submitting.');
+                             textArea.focus();
+                             return;
+                         }
+                         
+                         // Check for minimum length (basic validation)
+                         if (inputValue.length < 3) {
+                             textArea.setAttribute('aria-invalid', 'true');
+                             textArea.setAttribute('aria-describedby', 'enter-key-help validation-error');
+                             showValidationMessage('Please enter a more detailed travel query (at least 3 characters).');
+                             textArea.focus();
+                             return;
+                         }
+                         
+                         // Check if button is already disabled (preventing double submission)
+                         if (submitButton.disabled || submitButton.getAttribute('aria-disabled') === 'true') {
+                             showValidationMessage('Please wait, your request is being processed.');
+                             return;
+                         }
+                         
+                         // Clear any previous validation errors
+                         textArea.removeAttribute('aria-invalid');
+                         textArea.setAttribute('aria-describedby', 'enter-key-help');
+                         clearValidationMessage();
+                         
+                         // Trigger button click
+                         submitButton.click();
+                     }
+                     // Regular Enter for new line (default behavior)
+                     else if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey) {
+                         // Clear validation errors when user continues typing
+                         textArea.removeAttribute('aria-invalid');
+                         textArea.setAttribute('aria-describedby', 'enter-key-help');
+                         clearValidationMessage();
+                         return;
+                     }
+                 });
+                 
+                 // Add input event listener to clear validation errors while typing
+                 textArea.addEventListener('input', function() {
+                     if (textArea.getAttribute('aria-invalid') === 'true') {
+                         textArea.removeAttribute('aria-invalid');
+                         textArea.setAttribute('aria-describedby', 'enter-key-help');
+                         clearValidationMessage();
+                     }
+                 });
+                
+                // Add visual indicator for keyboard shortcuts
+                const shortcutHint = document.createElement('div');
+                shortcutHint.className = 'keyboard-shortcut-hint';
+                shortcutHint.innerHTML = '<small style="color: #6b7280; font-size: 0.75rem;">💡 Tip: Press Ctrl+Enter to submit</small>';
+                textArea.parentNode.appendChild(shortcutHint);
+            }
+        }
+        
+        // Initial setup
+        handleEnterKey();
+        
+        // Re-setup after Streamlit reruns
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    setTimeout(handleEnterKey, 100);
+                }
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+    </script>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="helper">AI Travel Agent may make mistakes. Verify important details.</div>', unsafe_allow_html=True)
+
+    # Close the app-wrap div
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    return user_input, submit_clicked
+
+
+# Brand mapping tables for stylized badges (fallback when logo URLs aren’t present)
+AIRLINE_BRANDS = {
+    'delta': {'abbr': 'DL', 'color': '#1D4ED8'},
+    'united': {'abbr': 'UA', 'color': '#1E3A8A'},
+    'american': {'abbr': 'AA', 'color': '#DC2626'},
+    'lufthansa': {'abbr': 'LH', 'color': '#F59E0B'},
+    'air france': {'abbr': 'AF', 'color': '#0EA5E9'},
+    'ryanair': {'abbr': 'FR', 'color': '#2563EB'},
+    'easyjet': {'abbr': 'U2', 'color': '#F97316'},
+    'emirates': {'abbr': 'EK', 'color': '#991B1B'},
+    'qatar': {'abbr': 'QR', 'color': '#7C3AED'},
+    'singapore': {'abbr': 'SQ', 'color': '#10B981'},
+}
+HOTEL_BRANDS = {
+    'marriott': {'abbr': 'MR', 'color': '#7C3AED'},
+    'hilton': {'abbr': 'HL', 'color': '#2563EB'},
+    'hyatt': {'abbr': 'HY', 'color': '#0EA5E9'},
+    'ihg': {'abbr': 'IH', 'color': '#F59E0B'},
+    'accor': {'abbr': 'AC', 'color': '#10B981'},
+    'radisson': {'abbr': 'RD', 'color': '#DC2626'},
+}
+
+
+# Real SVG logo mapping via SimpleIcons CDN (fallback to badges if not found)
+AIRLINE_LOGOS = {
+    'delta': 'https://cdn.simpleicons.org/deltaairlines?viewbox=auto',
+    'united': 'https://cdn.simpleicons.org/unitedairlines?viewbox=auto',
+    'american': 'https://cdn.simpleicons.org/americanairlines?viewbox=auto',
+    'lufthansa': 'https://cdn.simpleicons.org/lufthansa?viewbox=auto',
+    'air france': 'https://cdn.simpleicons.org/airfrance?viewbox=auto',
+}
+HOTEL_LOGOS = {
+    'marriott': 'https://cdn.simpleicons.org/marriott?viewbox=auto',
+    'hilton': 'https://cdn.simpleicons.org/hilton?viewbox=auto',
+    'hyatt': 'https://cdn.simpleicons.org/hyatt?viewbox=auto',
+    'ihg': 'https://cdn.simpleicons.org/ihg?viewbox=auto',
+    'accor': 'https://cdn.simpleicons.org/accor?viewbox=auto',
+}
+
+
+def _brand_badge_html(name: str, mapping: dict, default_icon: str) -> str:
+    if not name:
+        return default_icon
+    key = name.strip().lower()
+    # Loose matching for multi-word brand names
+    for brand, meta in mapping.items():
+        if brand in key:
+            abbr = meta.get('abbr', brand[:2].upper())
+            color = meta.get('color', '#3b82f6')
+            return f'<span class="brand-badge" style="background:{color}">{abbr}</span>'
+    return default_icon
+
+# Prefer real SVG logos when available
+
+def _brand_logo_html(name: str, svg_map: dict, default_icon: str, css_class: str = 'airline-logo') -> str:
+    if not name:
+        return default_icon
+    key = name.strip().lower()
+    for brand, url in svg_map.items():
+        if brand in key and url:
+            return f'<img src="{url}" class="{css_class}" alt="{name}">'  # URL and name are already cleaned upstream
+    return default_icon
+
+def parse_flight_data(flight_data):
+    """Parse individual flight data and return formatted HTML"""
+    import re
+    import html
+    
+    def clean_html(text):
+        """Remove HTML tags and clean text content"""
+        if not text:
+            return ""
+        
+        text_str = str(text)
+        
+        # Remove all HTML tags (including self-closing and malformed ones)
+        clean_text = re.sub(r'<[^>]*>', '', text_str)
+        
+        # Remove HTML entities and convert common ones to text
+        clean_text = re.sub(r'&nbsp;', ' ', clean_text)
+        clean_text = re.sub(r'&amp;', '&', clean_text)
+        clean_text = re.sub(r'&lt;', '<', clean_text)
+        clean_text = re.sub(r'&gt;', '>', clean_text)
+        clean_text = re.sub(r'&quot;', '"', clean_text)
+        clean_text = re.sub(r'&#39;', "'", clean_text)
+        clean_text = re.sub(r'&[a-zA-Z0-9#]+;', '', clean_text)
+        
+        # Remove extra whitespace and newlines
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        # Don't escape - we want clean text, not HTML entities
+        return clean_text
+    
+    try:
+        # Extract flight information
+        flights = flight_data.get('flights', [{}])
+        # Segment-aware selection: use first and last segments for dep/arr
+        first_segment = flights[0] if flights else {}
+        last_segment = flights[-1] if flights else first_segment
+        
+        # Airline/logo (prefer segment airline if present, else fallback)
+        airline = clean_html(first_segment.get('airline') or flight_data.get('airline') or 'Unknown Airline')
+        airline_logo = first_segment.get('airline_logo') or flight_data.get('airline_logo') or ''
+        # Prefer real SVG brand logo when available; fallback to provided logo URL, then badge
+        logo_html = (
+            f'<img src="{airline_logo}" class="airline-logo" alt="{airline}">' if airline_logo else _brand_logo_html(airline, AIRLINE_LOGOS, _brand_badge_html(airline, AIRLINE_BRANDS, '✈️'), 'airline-logo')
+        )
+        
+        # Airports: departure from first segment, arrival from last segment (handles connections)
+        departure_airport = first_segment.get('departure_airport') or flight_data.get('departure_airport') or {}
+        arrival_airport = last_segment.get('arrival_airport') or flight_data.get('arrival_airport') or {}
+        
+        dep_name = clean_html(departure_airport.get('name') or departure_airport.get('city') or 'Unknown')
+        dep_id = clean_html(departure_airport.get('id') or departure_airport.get('code') or '')
+        arr_name = clean_html(arrival_airport.get('name') or arrival_airport.get('city') or 'Unknown')
+        arr_id = clean_html(arrival_airport.get('id') or arrival_airport.get('code') or '')
+        
+        # Times: prefer segment times; fallback to possible alternative keys
+        departure_time = clean_html(
+            first_segment.get('departure_time')
+            or first_segment.get('departs_at')
+            or (departure_airport.get('time') if isinstance(departure_airport, dict) else None)
+            or flight_data.get('departure_time')
+            or 'Unknown'
+        )
+        arrival_time = clean_html(
+            last_segment.get('arrival_time')
+            or last_segment.get('arrives_at')
+            or (arrival_airport.get('time') if isinstance(arrival_airport, dict) else None)
+            or flight_data.get('arrival_time')
+            or 'Unknown'
+        )
+        
+        duration = clean_html(flight_data.get('total_duration', 'Unknown'))
+        price = clean_html(flight_data.get('price', 'Price not available'))
+        booking_link = flight_data.get('link', '')
+        
+        # Additional details
+        stops = len(flights) - 1 if len(flights) > 1 else 0
+        stops_text = f"{stops} stop{'s' if stops != 1 else ''}" if stops > 0 else "Direct"
+        aircraft = clean_html(first_segment.get('aircraft') or flight_data.get('aircraft') or 'Unknown aircraft')
+        travel_class = clean_html(first_segment.get('travel_class') or flight_data.get('travel_class') or 'Economy')
+        flight_number = clean_html(first_segment.get('flight_number') or flight_data.get('flight_number') or '')
+        
+        link_html = f'<a href="{booking_link}" class="btn-link" target="_blank" rel="noopener">View on Google Flights</a>' if booking_link else ''
+        
+        return f"""
+        <div class="travel-card-item">
+            <div class="card-header">
+                <div class="card-icon">{logo_html}</div>
+                <div>
+                    <h3 class="card-title">{airline} {flight_number}</h3>
+                    <p class="card-subtitle">{dep_name} ({dep_id}) → {arr_name} ({arr_id})</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div>
+                        <p><strong>Departure:</strong><br>{departure_time}</p>
+                        <p><strong>Arrival:</strong><br>{arrival_time}</p>
+                    </div>
+                    <div>
+                        <p><strong>Duration:</strong><br>{duration}</p>
+                        <p><strong>Stops:</strong><br>{stops_text}</p>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid rgba(59, 130, 246, 0.2); padding-top: 1rem;">
+                    <p><strong>Aircraft:</strong> {aircraft}</p>
+                    <p><strong>Class:</strong> {travel_class}</p>
+                    <p><strong>Price:</strong> <span class="price-highlight">{price}</span></p>
+                    <div>{link_html}</div>
+                </div>
+            </div>
+        </div>
+        """
+    except Exception as e:
+        return f"""
+        <div class="travel-card-item">
+            <div class="card-header">
+                <div class="card-icon">✈️</div>
+                <div>
+                    <h3 class="card-title">Flight Option</h3>
+                    <p class="card-subtitle">Flight details</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <p>Flight information available</p>
+            </div>
+        </div>
+        """
+
+def render_sidebar_settings():
+    st.sidebar.header('Settings')
+    # Currency
+    currency_options = ['USD', 'EUR', 'GBP', 'JPY', 'ILS']
+    currency_default = os.environ.get('CURRENCY', 'USD')
+    try:
+        currency_index = currency_options.index(currency_default)
+    except ValueError:
+        currency_index = 0
+    currency = st.sidebar.selectbox('Currency', currency_options, index=currency_index)
+
+    # Language (hl)
+    hl_options = ['en', 'es', 'de', 'fr', 'ja', 'he']
+    hl_default = os.environ.get('SERPAPI_HL', 'en')
+    try:
+        hl_index = hl_options.index(hl_default)
+    except ValueError:
+        hl_index = 0
+    hl = st.sidebar.selectbox('Language (hl)', hl_options, index=hl_index)
+
+    # Region (gl)
+    gl_options = ['us', 'uk', 'de', 'fr', 'es', 'jp', 'il']
+    gl_default = os.environ.get('SERPAPI_GL', 'us')
+    try:
+        gl_index = gl_options.index(gl_default)
+    except ValueError:
+        gl_index = 0
+    gl = st.sidebar.selectbox('Region (gl)', gl_options, index=gl_index)
+
+    # Flight type override (SerpAPI type: 1=Round trip, 2=One way)
+    flight_type_map = {'Round trip': '1', 'One way': '2'}
+    flight_type_default = os.environ.get('FLIGHTS_TYPE_OVERRIDE', '')
+    ft_label_default = 'Round trip' if flight_type_default == '1' else ('One way' if flight_type_default == '2' else 'Round trip')
+    flight_type_label = st.sidebar.selectbox('Flight Type', list(flight_type_map.keys()), index=list(flight_type_map.keys()).index(ft_label_default))
+    flights_type_override = flight_type_map[flight_type_label]
+
+    # Hotel sort_by override
+    # Common options: 8=Highest rating, 2=Price low->high, 3=Price high->low, 6=Distance
+    hotel_sort_options = [('Default', ''), ('Highest rating (8)', '8'), ('Price: Low to High (2)', '2'), ('Price: High to Low (3)', '3'), ('Distance (6)', '6')]
+    sort_default = os.environ.get('HOTELS_SORT_BY_OVERRIDE', '')
+    sort_index = next((i for i, (_, code) in enumerate(hotel_sort_options) if code == sort_default), 0)
+    sort_label, sort_code = st.sidebar.selectbox('Hotel Sort By', hotel_sort_options, index=sort_index)
+
+    # Apply settings immediately for runtime tools
+    os.environ['CURRENCY'] = currency
+    os.environ['SERPAPI_HL'] = hl
+    os.environ['SERPAPI_GL'] = gl
+    os.environ['FLIGHTS_TYPE_OVERRIDE'] = flights_type_override
+    os.environ['HOTELS_SORT_BY_OVERRIDE'] = sort_code
+
+    st.sidebar.caption('Settings apply to new searches.')
+
+def parse_hotel_data(hotel_data):
+    """Parse individual hotel data and return formatted HTML"""
+    import re
+    import html
+    
+    def clean_html(text):
+        """Remove HTML tags and clean text content"""
+        if not text:
+            return ""
+        
+        text_str = str(text)
+        
+        # Remove all HTML tags (including self-closing and malformed ones)
+        clean_text = re.sub(r'<[^>]*>', '', text_str)
+        
+        # Remove HTML entities and convert common ones to text
+        clean_text = re.sub(r'&nbsp;', ' ', clean_text)
+        clean_text = re.sub(r'&amp;', '&', clean_text)
+        clean_text = re.sub(r'&lt;', '<', clean_text)
+        clean_text = re.sub(r'&gt;', '>', clean_text)
+        clean_text = re.sub(r'&quot;', '"', clean_text)
+        clean_text = re.sub(r'&#39;', "'", clean_text)
+        clean_text = re.sub(r'&[a-zA-Z0-9#]+;', '', clean_text)
+        
+        # Remove extra whitespace and newlines
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        # Return clean text without HTML escaping
+        return clean_text
+    
+    try:
+        # Extract hotel information and clean HTML
+        name = clean_html(hotel_data.get('name', 'Unknown Hotel'))
+        location = clean_html(hotel_data.get('location', 'Unknown Location'))
+        rating = clean_html(hotel_data.get('overall_rating', 'No rating'))
+        reviews = clean_html(hotel_data.get('reviews', 'No reviews'))
+        
+        # Price information
+        rate_info = hotel_data.get('rate_per_night', {})
+        price = clean_html(rate_info.get('lowest', 'Price not available'))
+        price_currency = clean_html(rate_info.get('currency', ''))
+        price_display = f"{price} {price_currency}" if price_currency and price != 'Price not available' else price
+        
+        # Additional details
+        hotel_class = clean_html(hotel_data.get('hotel_class', 'Not specified'))
+        property_type = clean_html(hotel_data.get('type', 'Hotel'))
+        distance = clean_html(hotel_data.get('distance_from_search_location', ''))
+        
+        # Amenities
+        amenities = hotel_data.get('amenities', [])
+        top_amenities = [clean_html(amenity) for amenity in amenities[:4]] if amenities else ['Standard amenities']
+        amenities_text = ', '.join(top_amenities)
+        
+        # Images
+        images = hotel_data.get('images', [])
+        main_image = images[0] if images else ''
+        
+        # Rating display
+        rating_display = f"⭐ {rating}/5" if rating != 'No rating' else 'No rating'
+        reviews_display = f"({reviews} reviews)" if reviews != 'No reviews' else ''
+        
+        # Distance display
+        distance_text = f"📍 {distance}" if distance else ''
+        link = hotel_data.get('link', '')
+        link_html = f'<a href="{link}" class="btn-link" target="_blank" rel="noopener">View on Google Hotels</a>' if link else ''
+        image_html = f'<img src="{main_image}" alt="{name}" style="width:100%; height:200px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;" />' if main_image else ''
+        
+        # Brand badge in header
+        brand_html = _brand_badge_html(name, HOTEL_BRANDS, '🏨')
+        
+        return f"""
+        <div class="travel-card-item">
+            <div class="card-header">
+                <div class="card-icon">{brand_html}</div>
+                <div>
+                    <h3 class="card-title">{name}</h3>
+                    <p class="card-subtitle">{location}</p>
+                </div>
+            </div>
+            <div class="card-content">
+                {image_html}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div>
+                        <p><strong>Rating:</strong><br>{rating_display}</p>
+                        <p><strong>Type:</strong><br>{property_type}</p>
+                    </div>
+                    <div>
+                        <p><strong>Class:</strong><br>{hotel_class} star</p>
+                        <p><strong>Reviews:</strong><br>{reviews_display}</p>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid rgba(59, 130, 246, 0.2); padding-top: 1rem;">
+                    <p><strong>Amenities:</strong> {amenities_text}</p>
+                    <p><strong>Price per night:</strong> <span class="price-highlight">{price_display}</span></p>
+                    <div>{link_html}</div>
+                </div>
+            </div>
+        </div>
+        """
+    except Exception as e:
+        return f"""
+        <div class="travel-card-item">
+            <div class="card-header">
+                <div class="card-icon">🏨</div>
+                <div>
+                    <h3 class="card-title">Hotel Option</h3>
+                    <p class="card-subtitle">Hotel details</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <p>Hotel information available</p>
+            </div>
+        </div>
+        """
 
 def process_query(user_input):
     if user_input:
         try:
             thread_id = str(uuid.uuid4())
-            st.session_state.thread_id = thread_id
-
             messages = [HumanMessage(content=user_input)]
             config = {'configurable': {'thread_id': thread_id}}
 
             result = st.session_state.agent.graph.invoke({'messages': messages}, config=config)
+            
+            # Clean non-tool message content to remove any HTML tags including pre tags
+            if 'messages' in result:
+                for message in result['messages']:
+                    if hasattr(message, 'content'):
+                        # Preserve tool outputs (JSON) for parsing
+                        if hasattr(message, 'name') and message.name in ('flights_finder', 'hotels_finder'):
+                            continue
+                        message.content = clean_html_content(str(message.content))
 
-            st.subheader('Travel Information')
-            st.write(result['messages'][-1].content)
+            # Display response header
+            st.markdown('<div class="travel-response-container">', unsafe_allow_html=True)
+            st.markdown('''
+                <div class="travel-response-header">
+                    <h2 class="travel-response-title">Your Travel Results</h2>
+                    <p class="travel-response-subtitle">Here are the individual options I found for you</p>
+                </div>
+            ''', unsafe_allow_html=True)
 
-            st.session_state.travel_info = result['messages'][-1].content
+            # Check if we have tool results with structured data
+            has_structured_data = False
+            flights_data = []
+            hotels_data = []
+            
+            # Look for tool messages in the conversation
+            for message in result['messages']:
+                if hasattr(message, 'name') and hasattr(message, 'content'):
+                    if message.name == 'flights_finder':
+                        try:
+                            if isinstance(message.content, list):
+                                flights_data = message.content
+                            else:
+                                flights_data = json.loads(str(message.content))
+                            if isinstance(flights_data, list):
+                                has_structured_data = True
+                        except Exception:
+                            pass
+                    elif message.name == 'hotels_finder':
+                        try:
+                            if isinstance(message.content, list):
+                                hotels_data = message.content
+                            else:
+                                hotels_data = json.loads(str(message.content))
+                            if isinstance(hotels_data, list):
+                                has_structured_data = True
+                        except Exception:
+                            pass
+
+            if has_structured_data and (flights_data or hotels_data):
+                # Display structured data as individual cards
+                st.markdown('<div class="travel-cards-grid">', unsafe_allow_html=True)
+                
+                # Display flight cards or empty state
+                if flights_data:
+                    for flight in flights_data[:6]:  # Limit to 6 results
+                        flight_html = parse_flight_data(flight)
+                        st.markdown(flight_html, unsafe_allow_html=True)
+                else:
+                    st.markdown('''
+                        <div class="travel-card-item">
+                            <div class="card-header">
+                                <div class="card-icon">✈️</div>
+                                <div>
+                                    <h3 class="card-title">No Flights Found</h3>
+                                    <p class="card-subtitle">Try adjusting dates, airports, or budget.</p>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>No flight options matched your criteria.</p>
+                            </div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                
+                # Display hotel cards or empty state
+                if hotels_data:
+                    for hotel in hotels_data[:6]:  # Limit to 6 results
+                        hotel_html = parse_hotel_data(hotel)
+                        st.markdown(hotel_html, unsafe_allow_html=True)
+                else:
+                    st.markdown('''
+                        <div class="travel-card-item">
+                            <div class="card-header">
+                                <div class="card-icon">🏨</div>
+                                <div>
+                                    <h3 class="card-title">No Hotels Found</h3>
+                                    <p class="card-subtitle">Try changing location, dates, or rating/class.</p>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>No hotel options matched your criteria.</p>
+                            </div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+            else:
+                # If no structured data is available, show a simple message
+                st.markdown('''
+                    <div class="travel-card">
+                        <div class="travel-card-header">
+                            <div class="travel-card-icon">✈️</div>
+                            <h3 class="travel-card-title">Travel Information</h3>
+                        </div>
+                        <div class="travel-card-content">
+                            <p>I'm working on finding travel options for you. Please try refining your search with specific dates, locations, or preferences.</p>
+                        </div>
+                    </div>
+                ''', unsafe_allow_html=True)
+
+            st.markdown('</div>', unsafe_allow_html=True)
 
         except Exception as e:
+            st.markdown('<div class="travel-response-container">', unsafe_allow_html=True)
+            st.markdown('''
+                <div class="travel-card">
+                    <div class="travel-card-header">
+                        <div class="travel-card-icon">⚠️</div>
+                        <h3 class="travel-card-title">Error</h3>
+                    </div>
+                    <div class="travel-card-content">
+            ''', unsafe_allow_html=True)
             st.error(f'Error: {e}')
+            st.markdown('''
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
     else:
+        st.markdown('<div class="travel-response-container">', unsafe_allow_html=True)
+        st.markdown('''
+            <div class="travel-card">
+                <div class="travel-card-header">
+                    <div class="travel-card-icon">📝</div>
+                    <h3 class="travel-card-title">Missing Information</h3>
+                </div>
+                <div class="travel-card-content">
+        ''', unsafe_allow_html=True)
         st.error('Please enter a travel query.')
+        st.markdown('''
+                </div>
+            </div>
+        ''', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
-def render_email_form():
-    send_email_option = st.radio('Do you want to send this information via email?', ('No', 'Yes'))
-    if send_email_option == 'Yes':
-        with st.form(key='email_form'):
-            sender_email = st.text_input('Sender Email')
-            receiver_email = st.text_input('Receiver Email')
-            subject = st.text_input('Email Subject', 'Travel Information')
-            submit_button = st.form_submit_button(label='Send Email')
 
-        if submit_button:
-            if sender_email and receiver_email and subject:
-                send_email(sender_email, receiver_email, subject, st.session_state.thread_id)
-            else:
-                st.error('Please fill out all email fields.')
 
 
 def main():
+    st.set_page_config(page_title='AI Travel Agent', page_icon='✈️', layout='centered', initial_sidebar_state='collapsed')
     initialize_agent()
     render_custom_css()
-    user_input = render_ui()
-
-    if st.button('Get Travel Information'):
+    render_sidebar_settings()
+    # Environment warnings for missing keys
+    missing_env = []
+    if not os.environ.get('SERPAPI_API_KEY'):
+        missing_env.append('SERPAPI_API_KEY')
+    if not os.environ.get('GOOGLE_API_KEY'):
+        missing_env.append('GOOGLE_API_KEY')
+    if missing_env:
+        st.warning(f"Missing environment variables: {', '.join(missing_env)}. Set them in your environment, .env file, or via the sidebar.")
+    user_input, submit_clicked = render_ui()
+    if submit_clicked:
         process_query(user_input)
-
-    if 'travel_info' in st.session_state:
-        render_email_form()
 
 
 if __name__ == '__main__':

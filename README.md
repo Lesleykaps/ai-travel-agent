@@ -33,7 +33,7 @@ Clone the repository, set up the virtual environment, and install the required p
 1. Create a `.env` file in the root directory of the project.
 2. Add your API keys and environment variables to the `.env` file:
     ```plaintext
-    OPENAI_API_KEY=your_openai_api_key
+    GOOGLE_API_KEY=your_google_api_key
     SERPAPI_API_KEY=your_serpapi_api_key
     SENDGRID_API_KEY=your_sendgrid_api_key
 
@@ -51,6 +51,33 @@ To start the chatbot, run the following command:
 ```
 streamlit run app.py
 ```
+
+### Sidebar Settings
+You can configure runtime settings from the sidebar:
+- Currency (CURRENCY)
+- Language (SERPAPI_HL)
+- Region (SERPAPI_GL)
+- SERPAPI API Key (for Google Flights/Hotels)
+- Google API Key (for Gemini models)
+
+These settings apply to new searches during this session. Keys entered in the sidebar are not persisted.
+
+### Environment Variables (.env)
+Create a .env file at the project root to persist configuration:
+```
+GOOGLE_API_KEY=your_google_api_key
+SERPAPI_API_KEY=your_serpapi_api_key
+SENDGRID_API_KEY=your_sendgrid_api_key
+SERPAPI_HL=en
+SERPAPI_GL=us
+CURRENCY=USD
+
+# Observability variables
+LANGCHAIN_API_KEY=your_langchain_api_key
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=ai_travel_agent
+```
+The app automatically loads .env at startup.
 
 ### Using the Chatbot
 Once launched, simply enter your travel request. For example:
