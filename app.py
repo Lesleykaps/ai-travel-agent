@@ -48,6 +48,113 @@ def initialize_agent():
         st.session_state.agent = Agent()
 
 
+def render_weather_widget():
+    """Render a modern weather widget"""
+    # Get current time for demo weather
+    current_hour = datetime.datetime.now(datetime.timezone.utc).hour
+    
+    # Simple weather logic based on time
+    if 6 <= current_hour < 12:
+        weather_icon = "☀️"
+        weather_desc = "Sunny"
+        temp = "22°C"
+    elif 12 <= current_hour < 18:
+        weather_icon = "⛅"
+        weather_desc = "Partly Cloudy"
+        temp = "25°C"
+    elif 18 <= current_hour < 22:
+        weather_icon = "🌤️"
+        weather_desc = "Clear"
+        temp = "20°C"
+    else:
+        weather_icon = "🌙"
+        weather_desc = "Clear Night"
+        temp = "16°C"
+    
+    # Weather widget HTML
+    weather_html = f"""
+    <div style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 16px 20px;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-lg);
+        z-index: 20;
+        min-width: 140px;
+        text-align: center;
+    ">
+        <div style="font-size: 32px; margin-bottom: 8px;">{weather_icon}</div>
+        <div style="font-size: 24px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">{temp}</div>
+        <div style="font-size: 14px; color: var(--text-secondary); font-weight: 500;">{weather_desc}</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Local Weather</div>
+    </div>
+    """
+    
+    st.markdown(weather_html, unsafe_allow_html=True)
+
+
+def render_recent_chats_widget():
+    """Render recent chats widget"""
+    recent_chats = [
+        {"title": "Trip to Paris", "time": "2 hours ago"},
+        {"title": "Weekend in Rome", "time": "1 day ago"},
+        {"title": "Business trip NYC", "time": "3 days ago"}
+    ]
+    
+    recent_html = """
+    <div style="
+        position: absolute;
+        bottom: 40px;
+        left: 20px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-lg);
+        z-index: 20;
+        min-width: 280px;
+        max-width: 320px;
+    ">
+        <div style="
+            font-size: 16px; 
+            font-weight: 600; 
+            color: var(--text-primary); 
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        ">
+            <span>💬</span>
+            Your recent chats
+        </div>
+    """
+    
+    for chat in recent_chats:
+        recent_html += f"""
+        <div style="
+            padding: 12px 0;
+            border-bottom: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        " onmouseover="this.style.backgroundColor='var(--chip-bg)'" onmouseout="this.style.backgroundColor='transparent'">
+            <div style="font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px;">
+                {chat['title']}
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+                {chat['time']}
+            </div>
+        </div>
+        """
+    
+    recent_html += "</div>"
+    st.markdown(recent_html, unsafe_allow_html=True)
+
+
 def render_custom_css():
     with open("style.css", "r") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -56,8 +163,8 @@ def render_custom_css():
 def _time_of_day():
     """Get time of day greeting based on current hour"""
     try:
-        # Use UTC time for consistent behavior on Streamlit Cloud
-        hour = datetime.datetime.utcnow().hour
+        # Use timezone-aware UTC time for consistent behavior on Streamlit Cloud
+        hour = datetime.datetime.now(datetime.timezone.utc).hour
         if 5 <= hour < 12:
             return 'morning'
         elif 12 <= hour < 18:
@@ -70,54 +177,158 @@ def _time_of_day():
 
 
 def render_ui():
-    # Wrapper
+    # Main container with modern layout
     st.markdown('<div class="app-wrap">', unsafe_allow_html=True)
+    
+    # Render weather widget
+    render_weather_widget()
+    
+    # Render recent chats widget
+    render_recent_chats_widget()
 
-    # Top navigation / Home button
-    st.markdown('<div style="display:flex; justify-content:center; margin-bottom:2px;">', unsafe_allow_html=True)
-    st.markdown('<a href="https://lesleykaps.github.io/ai-travel-agent/" class="btn-link" target="_self" aria-label="Go to Home">⟵ Home</a>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Top navigation / Home button with improved styling
+    st.markdown('''
+    <div style="
+        display: flex; 
+        justify-content: center; 
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 15;
+    ">
+        <a href="https://lesleykaps.github.io/ai-travel-agent/" 
+           class="btn-link" 
+           target="_self" 
+           aria-label="Go to Home"
+           style="
+               color: var(--text-secondary);
+               text-decoration: none;
+               font-weight: 500;
+               font-size: 14px;
+               padding: 8px 16px;
+               border-radius: 12px;
+               background: var(--chip-bg);
+               border: 1px solid var(--card-border);
+               transition: all 0.2s ease;
+               backdrop-filter: blur(10px);
+           "
+           onmouseover="this.style.color='var(--text-primary)'; this.style.background='var(--chip-hover)'"
+           onmouseout="this.style.color='var(--text-secondary)'; this.style.background='var(--chip-bg)'">
+            ⟵ Home
+        </a>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    # Greeting container with orb on top
-    st.markdown('<div class="greeting-container" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 6px;">', unsafe_allow_html=True)
+    # Enhanced greeting container with orb
+    st.markdown('''
+    <div class="greeting-container" style="
+        position: relative; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        margin-bottom: 12px;
+        z-index: 10;
+    ">
+    ''', unsafe_allow_html=True)
+    
     st.markdown('<div class="orb"></div>', unsafe_allow_html=True)
     
     # Get time-based greeting with proper formatting
     time_greeting = _time_of_day()
-    greeting_text = f"Good {time_greeting.capitalize()}"
+    greeting_text = f"Good {time_greeting.capitalize()}, Iqbal"
     st.markdown(f'<div class="greeting">{greeting_text}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Can I help you with anything?</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">How can I help you?</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Suggestion chips
+    # Modern suggestion chips with icons
     suggestions = [
-        'Plan a round trip Madrid ↔ Amsterdam (Oct 1–7) and 4★ hotels',
-        'Weekend getaway from Berlin with flights + hotel under €300',
+        {'icon': '✈️', 'text': 'Create itinerary'},
+        {'icon': '📍', 'text': 'Make a plan'},
+        {'icon': '📋', 'text': 'Summarize text'},
+        {'icon': '💡', 'text': 'Help me write'},
+        {'icon': '🌍', 'text': 'Brainstorm'}
     ]
+    
     st.markdown('<div class="chips">', unsafe_allow_html=True)
-    chip_cols = st.columns(min(4, len(suggestions)))
-    for i, text in enumerate(suggestions):
-        with chip_cols[i % len(chip_cols)]:
-            if st.button(text, key=f'chip_{i}'):
-                st.session_state.query = text
+    chip_cols = st.columns(len(suggestions))
+    for i, suggestion in enumerate(suggestions):
+        with chip_cols[i]:
+            chip_html = f"""
+            <div style="
+                background: var(--chip-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 12px;
+                padding: 12px 16px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                backdrop-filter: blur(10px);
+                box-shadow: var(--shadow-sm);
+                margin: 4px;
+            " onclick="document.querySelector('[data-testid=\\"stTextArea\\"] textarea').value = '{suggestion['text']}'; document.querySelector('[data-testid=\\"stTextArea\\"] textarea').focus();"
+               onmouseover="this.style.background='var(--chip-hover)'; this.style.borderColor='var(--accent-primary)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.background='var(--chip-bg)'; this.style.borderColor='var(--card-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+                <div style="font-size: 20px; margin-bottom: 6px;">{suggestion['icon']}</div>
+                <div style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">{suggestion['text']}</div>
+            </div>
+            """
+            st.markdown(chip_html, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Query input with enhanced accessibility
-    st.markdown('<div class="query-input-container" role="region" aria-labelledby="query-label">', unsafe_allow_html=True)
-    st.markdown('<label id="query-label" class="sr-only">Travel Query Input</label>', unsafe_allow_html=True)
+    # Enhanced query input with modern styling
+    st.markdown('''
+    <div class="query-input-container" role="region" aria-labelledby="query-label" style="
+        position: relative;
+        margin: 20px 0;
+    ">
+        <label id="query-label" class="sr-only">Travel Query Input</label>
+        <div class="query-card">
+    ''', unsafe_allow_html=True)
+    
     user_input = st.text_area(
         'Travel Query',
-        height=140,
+        height=120,
         key='query',
-        placeholder='How can I help you today? Describe your trip or ask for suggestions…',
+        placeholder='Ask Synapse AI...',
         label_visibility='collapsed',
-        help='Enter your travel query. Press Ctrl+Enter to submit or Enter for a new line.'
+        help='Enter your query. Press Ctrl+Enter to submit or Enter for a new line.'
     )
-    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('''
+        </div>
+        <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding: 0 4px;
+        ">
+            <div style="
+                font-size: 12px;
+                color: var(--text-muted);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            ">
+                <span>💡</span>
+                <span>Try asking about travel plans, destinations, or itineraries</span>
+            </div>
+            <div style="
+                font-size: 11px;
+                color: var(--text-muted);
+                background: var(--chip-bg);
+                padding: 4px 8px;
+                border-radius: 6px;
+                border: 1px solid var(--card-border);
+            ">
+                Ctrl + Enter to send
+            </div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    # Primary action button
+    # Enhanced primary action button
     st.markdown('<div class="primary-actions">', unsafe_allow_html=True)
-    submit_clicked = st.button('Get Travel Information', use_container_width=True, key='submit_btn')
+    submit_clicked = st.button('✨ Generate Response', use_container_width=True, key='submit_btn')
     st.markdown('</div>', unsafe_allow_html=True)
 
     # JavaScript for Enter key functionality

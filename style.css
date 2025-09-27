@@ -1,11 +1,21 @@
-/* Custom CSS for AI Travel Agent - Updated v20250927033437 - FORCE RELOAD */
+/* Custom CSS for AI Travel Agent - Modern Dark Interface v2025 */
 :root {
-    --bg: #0b0f14;
-    --card: #0f141b;
-    --text: #e6e6e6;
-    --muted: #9aa4af;
-    --accent: #3b82f6;
-    --chip: #1a2230;
+    --bg-primary: #0a1628;
+    --bg-secondary: #1e293b;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    --card-bg: rgba(30, 41, 59, 0.8);
+    --card-border: rgba(71, 85, 105, 0.3);
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --chip-bg: rgba(51, 65, 85, 0.6);
+    --chip-hover: rgba(71, 85, 105, 0.8);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Animated background effects */
@@ -90,24 +100,193 @@
      }
  }
 
-:root {
-    --chip-hover: #233044;
-    --border: #1e2937;
-}
 .block-container { padding-top: 2rem; max-width: 980px; position: relative; z-index: 1; }
-body, .stApp { background: radial-gradient(1200px 600px at 50% -200px, #132133 0%, var(--bg) 60%); color: var(--text); }
+
+/* Modern animated background */
+@keyframes backgroundShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Subtle floating particles */
+@keyframes particleFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+    50% { transform: translateY(-15px) rotate(90deg); opacity: 0.8; }
+}
+
+/* Main app container with modern gradient */
+.stApp {
+    background: var(--bg-gradient);
+    background-size: 400% 400%;
+    animation: backgroundShift 20s ease infinite;
+    color: var(--text-primary);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Subtle floating particles overlay */
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(1px 1px at 25px 35px, rgba(59, 130, 246, 0.2), transparent),
+        radial-gradient(1px 1px at 85px 65px, rgba(139, 92, 246, 0.15), transparent),
+        radial-gradient(0.5px 0.5px at 135px 45px, rgba(59, 130, 246, 0.25), transparent),
+        radial-gradient(0.5px 0.5px at 175px 85px, rgba(139, 92, 246, 0.2), transparent);
+    background-repeat: repeat;
+    background-size: 250px 120px;
+    animation: particleFloat 25s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.6;
+}
+
+/* Body styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
 label[for="query"] {display:none}
-.app-wrap{ display:flex; flex-direction:column; align-items:center; gap:18px; position: relative; z-index: 10; }
-.orb { width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #6ee7ff, #3b82f6 40%, #1d4ed8 70%); box-shadow: 0 0 40px rgba(99, 102, 241, 0.55), 0 0 80px rgba(59, 130, 246, .25); filter: blur(.2px); animation: float 6s ease-in-out infinite; position: absolute; top: 45px; left: 50%; transform: translateX(-50%); z-index: 5; }
-@keyframes float { 0%,100%{ transform: translateX(-50%) translateY(0)} 50%{ transform: translateX(-50%) translateY(-6px)} }
-.greeting{ font-size: 36px; font-weight: 700; text-align:center; margin-top: 90px; position: relative; z-index: 25; }
-.subtitle{ font-size: 16px; color: var(--muted); text-align:center; margin-top:-6px; position: relative; z-index: 25; }
-.chips{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin: 8px 0 2px; position: relative; z-index: 12; }
-.chips .stButton>button{ background: var(--chip); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 14px; position: relative; z-index: 13; }
-.chips .stButton>button:hover{ background: var(--chip-hover); border-color:#2b3b50 }
-.query-card{ width:100%; background: var(--card); border:1px solid var(--border); border-radius: 16px; padding: 8px 14px; position: relative; z-index: 11; }
-.query-card textarea{ background: transparent!important; color: var(--text)!important; border: none!important; box-shadow:none!important; font-size:16px; }
-.query-card textarea::placeholder{ color: #778395; }
+
+/* Main app wrapper */
+.app-wrap{ 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 24px; 
+    position: relative; 
+    z-index: 10; 
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Modern orb with enhanced glow */
+.orb { 
+    width: 100px; 
+    height: 100px; 
+    border-radius: 50%; 
+    background: radial-gradient(circle at 30% 30%, #60a5fa, var(--accent-primary) 40%, #1d4ed8 70%); 
+    box-shadow: 
+        0 0 60px rgba(59, 130, 246, 0.4), 
+        0 0 120px rgba(59, 130, 246, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset; 
+    filter: blur(0.3px); 
+    animation: float 8s ease-in-out infinite; 
+    position: absolute; 
+    top: 40px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    z-index: 5; 
+}
+
+@keyframes float { 
+    0%, 100% { transform: translateX(-50%) translateY(0) scale(1); } 
+    50% { transform: translateX(-50%) translateY(-8px) scale(1.02); } 
+}
+
+/* Modern greeting text */
+.greeting{ 
+    font-size: 42px; 
+    font-weight: 600; 
+    text-align: center; 
+    margin-top: 100px; 
+    position: relative; 
+    z-index: 25; 
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+/* Subtitle styling */
+.subtitle{ 
+    font-size: 18px; 
+    color: var(--text-secondary); 
+    text-align: center; 
+    margin-top: -8px; 
+    position: relative; 
+    z-index: 25; 
+    font-weight: 400;
+    opacity: 0.9;
+}
+/* Modern suggestion chips */
+.chips{ 
+    display: flex; 
+    gap: 12px; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    margin: 16px 0 24px; 
+    position: relative; 
+    z-index: 12; 
+}
+
+.chips .stButton>button{ 
+    background: var(--chip-bg); 
+    color: var(--text-secondary); 
+    border: 1px solid var(--card-border); 
+    border-radius: 12px; 
+    padding: 10px 16px; 
+    font-size: 14px; 
+    font-weight: 500;
+    position: relative; 
+    z-index: 13; 
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+}
+
+.chips .stButton>button:hover{ 
+    background: var(--chip-hover); 
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Modern query input card */
+.query-card{ 
+    width: 100%; 
+    background: var(--card-bg); 
+    border: 1px solid var(--card-border); 
+    border-radius: 20px; 
+    padding: 16px 20px; 
+    position: relative; 
+    z-index: 11; 
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+}
+
+.query-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-xl);
+}
+
+.query-card textarea{ 
+    background: transparent !important; 
+    color: var(--text-primary) !important; 
+    border: none !important; 
+    box-shadow: none !important; 
+    font-size: 16px; 
+    font-weight: 400;
+    line-height: 1.5;
+    resize: none;
+}
+
+.query-card textarea::placeholder{ 
+    color: var(--text-muted); 
+    font-weight: 400;
+}
 .primary-actions{ 
     position: relative !important;
     z-index: 11 !important; 
@@ -132,7 +311,7 @@ label[for="query"] {display:none}
     padding: 0 !important;
 }
 
-/* Button styling and centering */
+/* Modern button styling */
 .primary-actions .stButton>button, 
 div[data-testid="stButton"] > button,
 .primary-actions div[data-testid="stButton"] > button,
@@ -140,28 +319,36 @@ div[data-testid="stButton"] > button,
 .primary-actions button[data-testid="baseButton-primary"]{ 
     width: auto !important; 
     min-width: fit-content !important;
-    max-width: 300px !important;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; 
+    max-width: 320px !important;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%) !important; 
     color: white !important; 
     font-weight: 600 !important; 
-    font-size: 14px !important;
+    font-size: 15px !important;
     border: 0 !important; 
-    border-radius: 25px !important; 
-    padding: 10px 24px !important; 
+    border-radius: 16px !important; 
+    padding: 14px 28px !important; 
     cursor: pointer !important; 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset !important;
+    box-shadow: 
+        var(--shadow-lg),
+        0 0 0 1px rgba(255,255,255,0.1) inset !important;
     margin: 0 auto !important;
     display: block !important;
     position: relative !important;
+    backdrop-filter: blur(10px) !important;
+    letter-spacing: 0.01em !important;
 }
 
 .primary-actions .stButton>button:hover,
 .primary-actions div[data-testid="stButton"] > button:hover,
 .primary-actions button[kind="primary"]:hover,
 .primary-actions button[data-testid="baseButton-primary"]:hover { 
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5), 0 0 0 1px rgba(255,255,255,0.15) inset !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 
+        var(--shadow-xl),
+        0 0 30px rgba(59, 130, 246, 0.4),
+        0 0 0 1px rgba(255,255,255,0.2) inset !important;
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%) !important;
 }
 .btn-link {
   display: inline-block;
