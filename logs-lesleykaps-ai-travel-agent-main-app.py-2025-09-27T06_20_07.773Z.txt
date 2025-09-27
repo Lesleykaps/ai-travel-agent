@@ -1,0 +1,349 @@
+
+[     UTC     ] Logs for flybudd.streamlit.app/
+────────────────────────────────────────────────────────────────────────────────────────
+[06:01:11] 🚀 Starting up repository: 'ai-travel-agent', branch: 'main', main module: 'app.py'
+[06:01:11] 🐙 Cloning repository...
+[06:01:11] 🐙 Cloning into '/mount/src/ai-travel-agent'...
+
+[06:01:11] 🐙 Cloned repository!
+[06:01:11] 🐙 Pulling code changes from Github...
+[06:01:12] 📦 Processing dependencies...
+
+──────────────────────────────────────── uv ───────────────────────────────────────────
+
+Using uv pip install.
+Using Python 3.13.7 environment at /home/adminuser/venv
+Resolved 89 packages in 1.15s
+Prepared 89 packages in 2.21s
+Installed 89 packages in 137ms
+ + altair==5.5.0
+ + annotated-types==0.7.0
+ + anyio==4.11.0
+ + attrs==25.3.0
+ + beautifulsoup4==4.13.5
+ + blinker==1.9.0
+ + cachetools==5.5.2
+ + certifi==2025.8.3[2025-09-27 06:01:15.820683] 
+ + charset-normalizer==3.4.3
+ + click==8.3.0
+ + filetype==1.2.0
+ + gitdb==4.0.12
+ + gitpython==3.1.45
+ + google-ai-generativelanguage==0.6.15
+ + google-api-core==2.25.1
+ + google-api-python-client==2.183.0
+ + google-auth==2.40.3
+ + google-auth-httplib2[2025-09-27 06:01:15.821095] ==0.2.0
+ + google-generativeai==0.8.5
+ + googleapis-common-protos==1.70.0
+ + grandalf==0.8
+ + greenlet==3.2.4
+ + grpcio==1.75.1
+ + grpcio-status==1.71.2
+ + h11==0.16.0
+ + httpcore==[2025-09-27 06:01:15.821312] 1.0.9
+ + httplib2==0.31.0
+ + httpx==0.28.1
+ + idna==3.10
+ + jinja2==3.1.6
+ + jsonpatch==1.33
+ + jsonpointer==3.0.0
+ + jsonschema==4.25.1
+ +[2025-09-27 06:01:15.821548]  jsonschema-specifications==2025.9.1
+ + langchain==0.3.27
+ + langchain-core==0.3.76
+ + langchain-google-genai==2.0.10
+ + langchain-text-splitters==0.3.11
+ + langgraph==0.6.7[2025-09-27 06:01:15.821787] 
+ + langgraph-checkpoint==2.1.1
+ + langgraph-prebuilt==0.6.4
+ + langgraph-sdk==0.2.9
+ + langsmith==0.4.31
+ + mailgun==1.1.0
+ + markupsafe==3.0.2
+ + narwhals==2.5.0
+ + numpy==2.3.3
+ + orjson==3.11.3[2025-09-27 06:01:15.822164] 
+ + ormsgpack==1.10.0
+ + packaging==25.0
+ + pandas==2.3.2
+ + pillow==11.3.0
+ + proto-plus==1.26.1
+ + protobuf==5.29.5
+ + pyarrow==21.0.0
+ + pyasn1==0.6.1
+ + pyasn1-modules==0.4.2
+ + pydantic==2.11.9
+ +[2025-09-27 06:01:15.822448]  pydantic-core==2.33.2
+ + pydeck==0.9.1
+ + pyparsing==3.2.5
+ + python-dateutil==2.9.0.post0
+ + python-dotenv==1.1.1
+ + pytz==2025.2[2025-09-27 06:01:15.822635] 
+ + pyyaml==6.0.3
+ + referencing==0.36.2
+ + requests==2.32.5
+ + requests-toolbelt==1.0.0
+ + rpds-py==0.27.1
+ + rsa==4.9.1
+ + serpapi==0.1.5
+ [2025-09-27 06:01:15.822802] + six==1.17.0
+ + smmap==5.0.2
+ + sniffio==1.3.1
+ + soupsieve==2.8
+ + sqlalchemy==2.0.43
+ + streamlit[2025-09-27 06:01:15.822946] ==1.50.0
+ + tenacity==9.1.2
+ + toml==0.10.2
+ + tornado==6.5.2
+ + tqdm==4.67.1
+ + typing-extensions==4.15.0[2025-09-27 06:01:15.823091] 
+ + typing-inspection==0.4.1
+ + tzdata==2025.2
+ + uritemplate==4.2.0
+ + urllib3==2.5.0
+ + watchdog==6.0.0
+ + xxhash==3.5.0[2025-09-27 06:01:15.823220] 
+ + zstandard==0.25.0
+Checking if Streamlit is installed
+Found Streamlit version 1.50.0 in the environment
+Installing rich for an improved exception logging
+Using uv pip install.
+Using Python 3.13.7 environment at /home/adminuser/venv
+Resolved 4 packages in 124ms
+Prepared 4 packages in 112ms
+Installed 4 packages in 31ms
+ + markdown-it-py==4.0.0
+ + mdurl==0.1.2
+ + pygments==2.19.2
+ + rich==14.1.0
+
+────────────────────────────────────────────────────────────────────────────────────────
+
+[06:01:18] 🐍 Python dependencies were installed from /mount/src/ai-travel-agent/requirements.txt using uv.
+[06:01:18] 📦 WARN: More than one requirements file detected in the repository. Available options: uv /mount/src/ai-travel-agent/requirements.txt, poetry /mount/src/ai-travel-agent/pyproject.toml. Used: uv with /mount/src/ai-travel-agent/requirements.txt
+Check if streamlit is installed
+Streamlit is already installed
+[06:01:19] 📦 Processed dependencies!
+
+
+
+/mount/src/ai-travel-agent/agents/agent.py:15: LangChainDeprecationWarning: As of langchain-core 0.3.0, LangChain uses pydantic v2 internally. The langchain.pydantic_v1 module was a compatibility shim for pydantic v1, and should no longer be used. Please update the code to import from Pydantic directly.
+
+For example, replace imports like: `from langchain.pydantic_v1 import BaseModel`
+with: `from pydantic import BaseModel`
+or the v1 compatibility namespace if you are working in a code base that has not been fully upgraded to pydantic 2 yet. 	from pydantic.v1 import BaseModel
+
+  from agents.tools.flights_finder import flights_finder
+[06:07:57] 🐙 Pulling code changes from Github...
+[06:07:58] 📦 Processing dependencies...
+[06:07:58] 📦 Processed dependencies!
+[06:07:59] 🔄 Updated app!
+[06:17:00] 🐙 Pulling code changes from Github...
+[06:17:00] 📦 Processing dependencies...
+[06:17:00] 📦 Processed dependencies!
+[06:17:02] 🔄 Updated app!
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+Calling: {'name': 'flights_finder', 'args': {'params': {'return_date': '2025-10-07', 'arrival_airport': 'AMS', 'outbound_date': '2025-10-01', 'departure_airport': 'MAD'}}, 'id': '843c6ddb-fd4d-4233-b73d-6553eb27fb8a', 'type': 'tool_call'}
+DEBUG: Search params being sent to SerpAPI (masked): {'api_key': '***', 'engine': 'google_flights', 'hl': 'en', 'gl': 'us', 'departure_id': 'MAD', 'arrival_id': 'AMS', 'outbound_date': '2025-10-01', 'currency': 'USD', 'adults': 1, 'infants_in_seat': 0, 'infants_on_lap': 0, 'children': 0, 'type': '1', 'return_date': '2025-10-07'}
+DEBUG: SerpAPI response keys: ['search_metadata', 'search_parameters', 'best_flights', 'other_flights', 'price_insights', 'airports']
+Calling: {'name': 'hotels_finder', 'args': {'params': {'hotel_class': '4', 'q': 'Amsterdam', 'check_out_date': '2025-10-07', 'check_in_date': '2025-10-01'}}, 'id': 'c45a0454-01e3-4974-a962-ed94d146b8a0', 'type': 'tool_call'}
+DEBUG: Hotel Search params (masked): {'api_key': '***', 'engine': 'google_hotels', 'hl': 'en', 'gl': 'us', 'q': 'Amsterdam', 'check_in_date': '2025-10-01', 'check_out_date': '2025-10-07', 'currency': 'USD', 'adults': 1, 'children': 0, 'rooms': 1, 'sort_by': 8, 'hotel_class': '4'}
+Back to the model!
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	call_tools_llm(call_tools_llm)
+	invoke_tools(invoke_tools)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> call_tools_llm;
+	call_tools_llm -.-> __end__;
+	call_tools_llm -. &nbsp;more_tools&nbsp; .-> invoke_tools;
+	invoke_tools --> call_tools_llm;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:128 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:669 in code_to_exec                                     
+                                                                                
+  /mount/src/ai-travel-agent/app.py:12 in <module>                              
+                                                                                
+      9 from langchain_core.messages import HumanMessage                        
+     10                                                                         
+     11 from agents.agent import Agent                                          
+  ❱  12                                                                         
+     13                                                                         
+     14 from bs4 import BeautifulSoup                                           
+     15 from dotenv import load_dotenv                                          
+────────────────────────────────────────────────────────────────────────────────
+ModuleNotFoundError: No module named 'utils'
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:128 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:669 in code_to_exec                                     
+                                                                                
+  /mount/src/ai-travel-agent/app.py:12 in <module>                              
+                                                                                
+      9 from langchain_core.messages import HumanMessage                        
+     10                                                                         
+     11 from agents.agent import Agent                                          
+  ❱  12 from utils import get_env_var                                           
+     13                                                                         
+     14 from bs4 import BeautifulSoup                                           
+     15 from dotenv import load_dotenv                                          
+────────────────────────────────────────────────────────────────────────────────
+ModuleNotFoundError: No module named 'utils'
+────────────────────── Traceback (most recent call last) ───────────────────────
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/exec_code.py:128 in exec_func_with_error_handling                        
+                                                                                
+  /home/adminuser/venv/lib/python3.13/site-packages/streamlit/runtime/scriptru  
+  nner/script_runner.py:669 in code_to_exec                                     
+                                                                                
+  /mount/src/ai-travel-agent/app.py:12 in <module>                              
+                                                                                
+      9 from langchain_core.messages import HumanMessage                        
+     10                                                                         
+     11 from agents.agent import Agent                                          
+  ❱  12 from utils import get_env_var                                           
+     13                                                                         
+     14 from bs4 import BeautifulSoup                                           
+     15 from dotenv import load_dotenv                                          
+────────────────────────────────────────────────────────────────────────────────
+ModuleNotFoundError: No module named 'utils'
