@@ -5,6 +5,7 @@ from typing import Optional
 import serpapi
 from langchain.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import tool
+from utils import get_env_var
 
 
 class FlightsInput(BaseModel):
@@ -32,14 +33,14 @@ def flights_finder(params: FlightsInput):
     '''
 
     search_params = {
-        'api_key': os.environ.get('SERPAPI_API_KEY'),
+        'api_key': get_env_var('SERPAPI_API_KEY'),
         'engine': 'google_flights',
-        'hl': os.environ.get('SERPAPI_HL', 'en'),
-        'gl': os.environ.get('SERPAPI_GL', 'us'),
+        'hl': get_env_var('SERPAPI_HL', 'en'),
+        'gl': get_env_var('SERPAPI_GL', 'us'),
         'departure_id': params.departure_airport,
         'arrival_id': params.arrival_airport,
         'outbound_date': params.outbound_date,
-        'currency': os.environ.get('CURRENCY', 'USD'),
+        'currency': get_env_var('CURRENCY', 'USD'),
         'adults': params.adults,
         'infants_in_seat': params.infants_in_seat,
         'infants_on_lap': params.infants_on_lap,
@@ -55,7 +56,7 @@ def flights_finder(params: FlightsInput):
         search_params['type'] = '2'  # One way
 
     # Allow runtime override from sidebar settings
-    override_type = os.environ.get('FLIGHTS_TYPE_OVERRIDE')
+    override_type = get_env_var('FLIGHTS_TYPE_OVERRIDE')
     if override_type in {'1', '2'}:
         search_params['type'] = override_type
 

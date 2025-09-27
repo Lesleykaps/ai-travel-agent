@@ -14,6 +14,7 @@ from langgraph.graph import END, StateGraph
 
 from agents.tools.flights_finder import flights_finder
 from agents.tools.hotels_finder import hotels_finder
+from utils import get_env_var
 
 _ = load_dotenv()
 
@@ -47,7 +48,7 @@ class Agent:
 
     def __init__(self):
         self._tools = {t.name: t for t in TOOLS}
-        self._tools_llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite', google_api_key=os.environ.get('GOOGLE_API_KEY')).bind_tools(TOOLS)
+        self._tools_llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite', google_api_key=get_env_var('GOOGLE_API_KEY')).bind_tools(TOOLS)
 
         builder = StateGraph(AgentState)
         builder.add_node('call_tools_llm', self.call_tools_llm)

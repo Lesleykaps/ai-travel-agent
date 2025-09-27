@@ -4,6 +4,7 @@ from typing import Optional
 import serpapi
 from langchain.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import tool
+from utils import get_env_var
 
 # from pydantic import BaseModel, Field
 
@@ -34,14 +35,14 @@ def hotels_finder(params: HotelsInput):
     '''
 
     search_params = {
-        'api_key': os.environ.get('SERPAPI_API_KEY'),
+        'api_key': get_env_var('SERPAPI_API_KEY'),
         'engine': 'google_hotels',
-        'hl': os.environ.get('SERPAPI_HL', 'en'),
-        'gl': os.environ.get('SERPAPI_GL', 'us'),
+        'hl': get_env_var('SERPAPI_HL', 'en'),
+        'gl': get_env_var('SERPAPI_GL', 'us'),
         'q': params.q,
         'check_in_date': params.check_in_date,
         'check_out_date': params.check_out_date,
-        'currency': os.environ.get('CURRENCY', 'USD'),
+        'currency': get_env_var('CURRENCY', 'USD'),
         'adults': params.adults,
         'children': params.children,
         'rooms': params.rooms,
@@ -50,7 +51,7 @@ def hotels_finder(params: HotelsInput):
     }
 
     # Allow runtime override from sidebar settings
-    override_sort = os.environ.get('HOTELS_SORT_BY_OVERRIDE')
+    override_sort = get_env_var('HOTELS_SORT_BY_OVERRIDE')
     if override_sort:
         search_params['sort_by'] = override_sort
 
