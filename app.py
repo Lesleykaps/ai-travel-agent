@@ -9,10 +9,12 @@ import streamlit as st
 from langchain_core.messages import HumanMessage
 
 from agents.agent import Agent
-
+from utils import get_env_var
 
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+# Load environment variables for local development
 load_dotenv()
  
 def clean_html_content(content):
@@ -66,7 +68,7 @@ def render_ui():
 
     # Top navigation / Home button
     st.markdown('<div style="display:flex; justify-content:center; margin-bottom:2px;">', unsafe_allow_html=True)
-    st.markdown('<a href="http://localhost:3000/" class="btn-link" target="_self" aria-label="Go to Home">⟵ Home</a>', unsafe_allow_html=True)
+    st.markdown('<a href="https://lesleykaps.github.io/ai-travel-agent/" class="btn-link" target="_self" aria-label="Go to Home">⟵ Home</a>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Greeting container with orb on top
@@ -770,12 +772,12 @@ def main():
     render_sidebar_settings()
     # Environment warnings for missing keys
     missing_env = []
-    if not os.environ.get('SERPAPI_API_KEY'):
+    if not get_env_var('SERPAPI_API_KEY'):
         missing_env.append('SERPAPI_API_KEY')
-    if not os.environ.get('GOOGLE_API_KEY'):
+    if not get_env_var('GOOGLE_API_KEY'):
         missing_env.append('GOOGLE_API_KEY')
     if missing_env:
-        st.warning(f"Missing environment variables: {', '.join(missing_env)}. Set them in your environment, .env file, or via the sidebar.")
+        st.warning(f"Missing environment variables: {', '.join(missing_env)}. Set them in your environment, .env file, Streamlit secrets, or via the sidebar.")
     user_input, submit_clicked = render_ui()
     if submit_clicked:
         process_query(user_input)
