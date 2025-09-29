@@ -2,12 +2,10 @@ import os
 from typing import Optional
 
 import serpapi
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 from agents.utils.env_utils import get_env_var
 from agents.utils.city_standardizer import CityStandardizer
-
-# from pydantic import BaseModel, Field
 
 
 class HotelsInput(BaseModel):

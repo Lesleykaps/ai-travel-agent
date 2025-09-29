@@ -13,6 +13,10 @@ import os
 import sys
 from datetime import datetime
 
+# Configure logging first
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Add the parent directory to the Python path to import modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -26,10 +30,6 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Unexpected error importing TravelAgentBackend: {e}")
     TravelAgentBackend = None
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
