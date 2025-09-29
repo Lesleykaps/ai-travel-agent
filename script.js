@@ -569,6 +569,27 @@ class TravelAgentChat extends EventEmitter {
     this.setupModalEvents();
     this.setupKeyboardEvents();
     this.setupWindowEvents();
+    this.setupLogoEvents();
+  }
+
+  /**
+   * Setup logo event listeners
+   */
+  setupLogoEvents() {
+    const logoLink = document.getElementById('logo-link');
+    if (logoLink) {
+      logoLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Logo clicked, navigating to index.html');
+        
+        // Use window.location.href for navigation
+        const baseUrl = window.location.origin;
+        const targetUrl = `${baseUrl}/index.html`;
+        
+        console.log('Navigating to:', targetUrl);
+        window.location.href = targetUrl;
+      });
+    }
   }
 
   /**
@@ -1479,8 +1500,7 @@ class TravelAgentChat extends EventEmitter {
     // Hide suggested follow-ups
     this.hideSuggestedFollowups();
 
-    // Update title
-    this.updateChatTitle('New Chat');
+    // Keep title static as "Fly Buddy" - don't update with "New Chat"
 
     // Focus input
     if (this.elements.messageInput) {
@@ -1565,8 +1585,7 @@ class TravelAgentChat extends EventEmitter {
       this.showWelcomeScreen();
     }
 
-    // Update title
-    this.updateChatTitle(conversation.title);
+    // Keep title static as "Fly Buddy" - don't update with conversation title
 
     // Load draft if exists
     if (conversation.draft && this.elements.messageInput) {
@@ -1607,14 +1626,14 @@ class TravelAgentChat extends EventEmitter {
 
     const firstUserMessage = this.currentConversation.messages.find(m => m.sender === 'user');
     if (firstUserMessage) {
-      // Generate title from first user message (first 50 characters)
+      // Generate title from first user message (first 50 characters) for storage only
       let title = firstUserMessage.content.substring(0, 50);
       if (firstUserMessage.content.length > 50) {
         title += '...';
       }
       
       this.currentConversation.title = title;
-      this.updateChatTitle(title);
+      // Keep the header title static as "Fly Buddy" - don't update it with message content
       this.saveCurrentConversation();
     }
   }
@@ -1935,12 +1954,14 @@ class TravelAgentChat extends EventEmitter {
    * Update status indicator
    */
   updateStatusIndicator() {
-    if (this.elements.statusIndicator) {
-      const statusText = this.elements.statusIndicator.querySelector('span');
-      if (statusText) {
-        statusText.textContent = 'Ready';
-      }
-    }
+    // Clear any existing status indicators first
+    const allStatusIndicators = document.querySelectorAll('.status-indicator');
+    allStatusIndicators.forEach(indicator => {
+      const spans = indicator.querySelectorAll('span:not(.status-dot)');
+      spans.forEach(span => {
+        span.textContent = 'Ready to help';
+      });
+    });
   }
 
   /**

@@ -594,11 +594,36 @@ body {
   color: var(--color-text-primary);
 }
 
+.chat-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .chat-title h1 {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-xs);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.logo-link {
+  color: inherit;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.logo-link:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.logo-link:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .status-indicator {
@@ -606,12 +631,34 @@ body {
   align-items: center;
   gap: var(--space-xs);
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
+  line-height: 1;
 }
 
 .status-indicator i {
   color: var(--color-success);
   font-size: var(--font-size-xs);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-success);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .header-actions {
@@ -1487,8 +1534,17 @@ body {
     padding: 0 var(--space-md);
   }
   
+  .chat-title {
+    gap: 1px;
+  }
+  
   .chat-title h1 {
     font-size: var(--font-size-lg);
+    line-height: 1.1;
+  }
+  
+  .status-indicator {
+    font-size: 0.75rem;
   }
   
   .welcome-content h2 {
