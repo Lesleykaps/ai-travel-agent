@@ -19,8 +19,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Import the backend service
 try:
     from app import TravelAgentBackend
+    logger.info("Successfully imported TravelAgentBackend")
 except ImportError as e:
-    print(f"Warning: Could not import TravelAgentBackend: {e}")
+    logger.warning(f"Could not import TravelAgentBackend: {e}")
+    TravelAgentBackend = None
+except Exception as e:
+    logger.error(f"Unexpected error importing TravelAgentBackend: {e}")
     TravelAgentBackend = None
 
 # Configure logging
@@ -40,12 +44,15 @@ def get_backend():
     if backend is None:
         if TravelAgentBackend:
             try:
+                logger.info("Attempting to initialize TravelAgentBackend...")
                 backend = TravelAgentBackend()
                 logger.info("TravelAgentBackend initialized successfully")
             except Exception as e:
                 logger.error(f"Failed to initialize TravelAgentBackend: {e}")
+                logger.info("Falling back to MockBackend")
                 backend = MockBackend()
         else:
+            logger.info("TravelAgentBackend not available, using MockBackend")
             backend = MockBackend()
     return backend
 
@@ -103,23 +110,38 @@ def health_check():
 def chat():
     """Main chat endpoint for processing user messages"""
     try:
+        logger.info("Chat endpoint called")
+        
         data = request.get_json()
+        logger.info(f"Request data received: {data is not None}")
         
         if not data or 'message' not in data:
+            logger.warning("Invalid request: missing message")
             return jsonify({'error': 'Message is required'}), 400
         
         user_message = data['message'].strip()
         if not user_message:
+            logger.warning("Empty message received")
             return jsonify({'error': 'Message cannot be empty'}), 400
         
         logger.info(f"Processing message: {user_message[:100]}...")
         
         # Get backend instance
-        backend_instance = get_backend()
+        try:
+            backend_instance = get_backend()
+            logger.info(f"Backend instance obtained: {type(backend_instance).__name__}")
+        except Exception as e:
+            logger.error(f"Failed to get backend instance: {e}")
+            raise
         
         # Process the message
         start_time = time.time()
-        result = backend_instance.process_query(user_message)
+        try:
+            result = backend_instance.process_query(user_message)
+            logger.info(f"Backend processing completed: {result.get('success', False)}")
+        except Exception as e:
+            logger.error(f"Backend processing failed: {e}")
+            raise
         processing_time = time.time() - start_time
         
         if result.get('success', False):
