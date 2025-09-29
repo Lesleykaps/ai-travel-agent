@@ -15,7 +15,6 @@ langchain-google-genai = "^1.0.0"
 langgraph = "^0.2.0"
 grandalf = "^0.8"
 mailgun = "^0.1.1"
-streamlit = "^1.38.0"
 serpapi = "^0.1.5"
 beautifulsoup4 = "^4.12.3"
 

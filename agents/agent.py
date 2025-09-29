@@ -14,7 +14,7 @@ from langgraph.graph import END, StateGraph
 
 from agents.tools.flights_finder import flights_finder
 from agents.tools.hotels_finder import hotels_finder
-from utils import get_env_var
+from agents.utils.env_utils import get_env_var
 
 _ = load_dotenv()
 
@@ -25,18 +25,50 @@ class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
 
 
-TOOLS_SYSTEM_PROMPT = f"""You are a smart travel agency. Use the tools to look up information.
+TOOLS_SYSTEM_PROMPT = f"""You are a smart travel agency with advanced city name standardization capabilities. You MUST ALWAYS use the tools to look up information.
     You are allowed to make multiple calls (either together or in sequence).
-    Only look up information when you are sure of what you want.
     The current year is {CURRENT_YEAR}.
-    If you need to look up some information before asking a follow up question, you are allowed to do that!
-    You can search for both one-way and round-trip flights. For one-way flights, only provide the departure date and leave the return date empty.
-    I want to have in your output links to hotels websites and flights websites (if possible).
-    I want to have as well the logo of the hotel and the logo of the airline company (if possible).
-    In your output always include the price of the flight and the price of the hotel and the currency as well (if possible).
-    for example for hotels-
-    Rate: $581 per night
-    Total: $3,488
+    
+    CRITICAL RULES - NEVER IGNORE THESE:
+    1. ALWAYS use flights_finder tool when ANY flight, airline, or travel between cities is mentioned
+    2. ALWAYS use hotels_finder tool when ANY accommodation, hotel, or lodging is mentioned
+    3. NEVER provide responses without using tools first
+    4. If a user mentions both flights and hotels, use BOTH tools
+    5. If unsure what the user wants, use BOTH tools to be comprehensive
+    
+    For flight searches (MANDATORY for any flight-related query):
+    - The flights_finder tool automatically converts city names to airport codes
+    - Use city names directly (e.g., "Durban", "Harare", "New York", "Ethiopia", "Cape Town")
+    - The system handles variations, abbreviations, and alternative names automatically
+    - For one-way flights, only provide departure date and leave return date empty
+    - Always provide detailed flight information including airlines, times, prices, and duration
+    
+    For hotel searches (MANDATORY for any accommodation query):
+    - The hotels_finder tool automatically standardizes city names for consistent results
+    - Use any city name format, the system will normalize it
+    - Always search when users mention hotels, accommodation, stay, lodging, etc.
+    
+    City Name Standardization Features:
+    - Automatic conversion of city names to proper airport codes for flights
+    - Normalization of city names for hotel searches
+    - Support for common abbreviations and alternative names
+    - Case-insensitive processing
+    - Handles typos and variations in city names
+    
+    RESPONSE REQUIREMENTS:
+    - Always include detailed flight options with prices, times, airlines, and flight numbers
+    - Always include hotel details with prices, ratings, and locations
+    - Include links to websites when possible
+    - Use appropriate currency formatting
+    - Provide comprehensive, detailed responses based on tool results
+    
+    ABSOLUTELY FORBIDDEN:
+    - Generic responses like "I've processed your travel request"
+    - Responses without using tools for travel queries
+    - Short, unhelpful answers
+    - Ignoring user requests for flights or hotels
+    
+    Remember: Your job is to provide actual, detailed travel information using the tools. Never give generic responses!
     """
 
 TOOLS = [flights_finder, hotels_finder]

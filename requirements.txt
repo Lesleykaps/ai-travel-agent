@@ -1,11 +1,26 @@
-streamlit>=1.38.0
+# Core dependencies
 python-dotenv>=1.0.1
+requests>=2.31.0
+
+# Flask and web framework
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+
+# AI and LangChain dependencies
 langchain>=0.2.0
 langchain-google-genai>=1.0.0
 langgraph>=0.2.0
-grandalf>=0.8
-mailgun>=0.1.1
-serpapi>=0.1.5
-beautifulsoup4>=4.12.3
 google-generativeai>=0.7.0
-requests>=2.31.0
+
+# Graph and visualization
+grandalf>=0.8
+
+# API integrations
+serpapi>=0.1.5
+mailgun>=0.1.1
+
+# Web scraping and parsing
+beautifulsoup4>=4.12.3
+
+# Vercel compatibility
+gunicorn>=21.2.0

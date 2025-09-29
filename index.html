@@ -163,7 +163,7 @@
                 <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
-            <a href="https://flybudd.streamlit.app/" class="nav-cta" aria-label="Open the Travel Buddy app" rel="noopener">Get Started</a>
+            <a href="chat.html" class="nav-cta" aria-label="Open the Travel Buddy app">Get Started</a>
         </div>
     </nav>
 
@@ -179,7 +179,7 @@
                 </a>
                 <h1>Power Up Your Travel With Intelligent Planning</h1>
                 <p>AI Travel Agent integrates advanced AI to optimize your travel experience, enhance trip planning, and deliver personalized recommendations for unforgettable journeys.</p>
-                <a href="https://flybudd.streamlit.app/" class="hero-cta" aria-label="Launch the Travel Buddy app" rel="noopener">
+                <a href="chat.html" class="hero-cta" aria-label="Launch the Travel Buddy app">
                     <i class="fas fa-rocket" aria-hidden="true"></i> Get Started
                 </a>
             </div>
@@ -313,52 +313,17 @@
                 <a href="#features">Features</a>
                 <a href="#about">About</a>
                 <a href="#contact">Contact</a>
-                <a href="https://flybudd.streamlit.app/" aria-label="Open the application" rel="noopener">Open App</a>
+                <a href="chat.html" aria-label="Open the application">Open App</a>
             </div>
             <div class="footer-bottom">© <span id="year"></span> Travel Buddy. All rights reserved.</div>
         </div>
     </footer>
 
     <script>
-        // Update year and reduce JS footprint
+        // Set current year in footer
         document.getElementById('year').textContent = new Date().getFullYear();
-        
-        // Contact form functionality
-        document.querySelector('.contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message').value;
-            
-            if (!name || !email || !message) {
-                alert('Please fill in all fields.');
-                return;
-            }
-            
-            // Create mailto link
-            const subject = encodeURIComponent('Contact from Travel Buddy Website');
-            const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-            const mailtoLink = `mailto:lesleycodess@gmail.com?subject=${subject}&body=${body}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-            
-            // Show success message
-            const submitBtn = document.querySelector('.submit-btn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Message Sent!';
-            submitBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            
-            // Reset form and button after 3 seconds
-            setTimeout(() => {
-                this.reset();
-                submitBtn.innerHTML = originalText;
-                submitBtn.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
-            }, 3000);
-        });
-        
-        // Smooth scrolling for navigation links
+
+        // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -371,17 +336,30 @@
                 }
             });
         });
-        
-        // Add loading states for external links
-        document.querySelectorAll('a[href^="https://flybudd.streamlit.app"]').forEach(link => {
-            link.addEventListener('click', function() {
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
-                
-                // Reset after 2 seconds in case user comes back
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                }, 2000);
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const animateElements = document.querySelectorAll('.feature-card, .stat, .contact-item');
+            animateElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
             });
         });
     </script>

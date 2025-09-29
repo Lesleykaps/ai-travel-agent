@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fly Buddy - AI Travel Assistant</title>
+    <meta name="description" content="Your intelligent travel companion for planning perfect trips">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    
+    <!-- Application Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" role="complementary" aria-label="Navigation and chat history">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-plane" aria-hidden="true"></i>
+                    <span>Fly Buddy</span>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="true">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <button class="new-chat-btn" aria-label="Start new conversation">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <span>New Chat</span>
+                </button>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-grid">
+                        <button class="action-btn" data-action="flights" aria-label="Search flights">
+                            <i class="fas fa-plane" aria-hidden="true"></i>
+                            <span>Flights</span>
+                        </button>
+                        <button class="action-btn" data-action="hotels" aria-label="Find hotels">
+                            <i class="fas fa-bed" aria-hidden="true"></i>
+                            <span>Hotels</span>
+                        </button>
+                        <button class="action-btn" data-action="itinerary" aria-label="Plan itinerary">
+                            <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+                            <span>Itinerary</span>
+                        </button>
+                        <button class="action-btn" data-action="destinations" aria-label="Explore destinations">
+                            <i class="fas fa-globe-americas" aria-hidden="true"></i>
+                            <span>Destinations</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Chat History -->
+                <div class="chat-history">
+                    <h3>Recent Chats</h3>
+                    <div class="chat-list" role="list">
+                        <!-- Chat history items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <button class="theme-toggle" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon" aria-hidden="true"></i>
+                </button>
+                <button class="settings-btn" aria-label="Open settings">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <!-- Header -->
+            <header class="chat-header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
+                        <i class="fas fa-bars" aria-hidden="true"></i>
+                    </button>
+                    <div class="chat-title">
+                        <h1>Fly Buddy</h1>
+                        <div class="status-indicator">
+                            <span class="status-dot"></span>
+                            <span>Ready to help</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" data-action="export" aria-label="Export conversation">
+                        <i class="fas fa-download" aria-hidden="true"></i>
+                    </button>
+                    <button class="header-btn" data-action="clear" aria-label="Clear conversation">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <!-- Welcome Screen -->
+                <div class="welcome-screen">
+                    <div class="welcome-content">
+                        <div class="welcome-icon">
+                            <i class="fas fa-plane" aria-hidden="true"></i>
+                        </div>
+                        <h2>Welcome to Fly Buddy</h2>
+                        <p>Your intelligent travel companion is ready to help you plan the perfect trip. Ask me anything about flights, hotels, destinations, or travel planning!</p>
+                    </div>
+                </div>
+                
+                <!-- Chat Messages -->
+                <div class="chat-messages" role="log" aria-live="polite" aria-label="Chat conversation">
+                    <!-- Messages will be populated by JavaScript -->
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div class="typing-indicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span class="typing-text">Fly Buddy is thinking...</span>
+                </div>
+                
+
+            </div>
+            
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="message-input" 
+                            placeholder="Ask me about your travel plans..." 
+                            rows="1"
+                            aria-label="Type your message"
+                            maxlength="2000"
+                        ></textarea>
+                        <button class="send-btn" aria-label="Send message" disabled>
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span class="char-count">0/2000</span>
+                        <span class="input-hint">Press <kbd>Enter</kbd> to send, <kbd>Shift+Enter</kbd> for new line</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modals -->
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="settingsTitle">Settings</h2>
+                <button class="modal-close" aria-label="Close settings">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="settings-form">
+                    <div class="setting-group">
+                        <label for="notifications">
+                            <input type="checkbox" id="notifications" checked>
+                            Enable notifications
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="soundEnabled">
+                            <input type="checkbox" id="soundEnabled" checked>
+                            Sound effects
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="autoSave">
+                            <input type="checkbox" id="autoSave" checked>
+                            Auto-save conversations
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="language">Language:</label>
+                        <select id="language">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+                <button class="btn btn-primary" data-action="save">Save Settings</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal" role="dialog" aria-labelledby="exportTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="exportTitle">Export Conversation</h2>
+                <button class="modal-close" aria-label="Close export dialog">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Choose export format:</p>
+                <div class="export-options">
+                    <button class="export-btn" data-format="txt">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        Text File
+                    </button>
+                    <button class="export-btn" data-format="json">
+                        <i class="fas fa-code" aria-hidden="true"></i>
+                        JSON
+                    </button>
+                    <button class="export-btn" data-format="pdf">
+                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal loading-modal" role="dialog" aria-labelledby="loadingTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <h2 id="loadingTitle">Processing your request...</h2>
+            <p>Please wait while I find the best travel options for you.</p>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" aria-live="polite" aria-atomic="true">
+        <!-- Toast notifications will be populated by JavaScript -->
+    </div>
+    
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
