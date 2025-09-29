@@ -1170,6 +1170,12 @@ body {
   text-align: center;
 }
 
+/* Hide static modals - they should only be shown when dynamically created */
+#exportModal,
+#loadingModal {
+  display: none !important;
+}
+
 .loading-content {
   padding: var(--space-2xl);
 }
@@ -1454,6 +1460,13 @@ body {
   .modal-content {
     width: 95%;
     margin: var(--space-md);
+    max-height: 90vh;
+  }
+  
+  .modal-overlay {
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
   }
   
   .toast-container {

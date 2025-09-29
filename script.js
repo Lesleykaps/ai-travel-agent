@@ -566,6 +566,7 @@ class TravelAgentChat extends EventEmitter {
     this.setupSidebarEvents();
     this.setupInputEvents();
     this.setupHeaderEvents();
+    this.setupModalEvents();
     this.setupKeyboardEvents();
     this.setupWindowEvents();
   }
@@ -660,6 +661,46 @@ class TravelAgentChat extends EventEmitter {
     const clearBtn = document.querySelector('.header-btn[data-action="clear"]');
     if (clearBtn) {
       clearBtn.addEventListener('click', () => this.clearCurrentChat());
+    }
+  }
+
+  /**
+   * Setup static modal event listeners
+   */
+  setupModalEvents() {
+    // Settings modal close button
+    const settingsModal = document.getElementById('settingsModal');
+    if (settingsModal) {
+      const closeBtn = settingsModal.querySelector('.modal-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          settingsModal.classList.remove('show');
+          document.body.style.overflow = '';
+        });
+      }
+
+      // Close on backdrop click
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.classList.remove('show');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Settings form buttons
+      const cancelBtn = settingsModal.querySelector('[data-action="cancel"]');
+      const saveBtn = settingsModal.querySelector('[data-action="save"]');
+      
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          settingsModal.classList.remove('show');
+          document.body.style.overflow = '';
+        });
+      }
+      
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => this.saveStaticSettings());
+      }
     }
   }
 
@@ -1647,51 +1688,33 @@ class TravelAgentChat extends EventEmitter {
    */
   openSettings() {
     const settings = StorageManager.getSettings();
+    const settingsModal = document.getElementById('settingsModal');
     
-    const settingsContent = `
-      <form class="settings-form">
-        <div class="setting-group">
-          <label for="notifications">Enable Notifications</label>
-          <label class="setting-checkbox">
-            <input type="checkbox" id="notifications" ${settings.notifications ? 'checked' : ''}>
-            <span>Show desktop notifications</span>
-          </label>
-        </div>
-        
-        <div class="setting-group">
-          <label for="soundEnabled">Sound Effects</label>
-          <label class="setting-checkbox">
-            <input type="checkbox" id="soundEnabled" ${settings.soundEnabled ? 'checked' : ''}>
-            <span>Play notification sounds</span>
-          </label>
-        </div>
-        
-        <div class="setting-group">
-          <label for="autoSave">Auto-save</label>
-          <label class="setting-checkbox">
-            <input type="checkbox" id="autoSave" ${settings.autoSave ? 'checked' : ''}>
-            <span>Automatically save conversations</span>
-          </label>
-        </div>
-        
-        <div class="setting-group">
-          <label for="language">Language</label>
-          <select id="language" class="setting-select">
-            <option value="en" ${settings.language === 'en' ? 'selected' : ''}>English</option>
-            <option value="es" ${settings.language === 'es' ? 'selected' : ''}>Español</option>
-            <option value="fr" ${settings.language === 'fr' ? 'selected' : ''}>Français</option>
-          </select>
-        </div>
-      </form>
-    `;
+    if (!settingsModal) {
+      console.error('Settings modal not found');
+      return;
+    }
 
-    const footer = `
-      <button type="button" class="btn-secondary" onclick="travelAgent.modalManager.close()">Cancel</button>
-      <button type="button" class="btn-primary" onclick="travelAgent.saveSettings()">Save Settings</button>
-    `;
+    // Populate the static modal with current settings
+    const notificationsCheckbox = settingsModal.querySelector('#notifications');
+    const soundEnabledCheckbox = settingsModal.querySelector('#soundEnabled');
+    const autoSaveCheckbox = settingsModal.querySelector('#autoSave');
+    const languageSelect = settingsModal.querySelector('#language');
 
-    this.modalManager.createModal('settingsModal', 'Settings', settingsContent, footer);
-    this.modalManager.open('settingsModal');
+    if (notificationsCheckbox) notificationsCheckbox.checked = settings.notifications;
+    if (soundEnabledCheckbox) soundEnabledCheckbox.checked = settings.soundEnabled;
+    if (autoSaveCheckbox) autoSaveCheckbox.checked = settings.autoSave;
+    if (languageSelect) languageSelect.value = settings.language;
+
+    // Show the modal
+    settingsModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    // Focus management
+    const firstFocusable = settingsModal.querySelector('input, select, button');
+    if (firstFocusable) {
+      firstFocusable.focus();
+    }
   }
 
   /**
@@ -1710,6 +1733,33 @@ class TravelAgentChat extends EventEmitter {
 
     StorageManager.setSettings(settings);
     this.modalManager.close();
+    this.toastManager.show('Settings saved', 'success', 2000);
+
+    // Restart auto-save if setting changed
+    if (settings.autoSave) {
+      this.startAutoSave();
+    } else {
+      this.stopAutoSave();
+    }
+  }
+
+  /**
+   * Save settings from static modal
+   */
+  saveStaticSettings() {
+    const settingsModal = document.getElementById('settingsModal');
+    if (!settingsModal) return;
+
+    const settings = {
+      notifications: settingsModal.querySelector('#notifications').checked,
+      soundEnabled: settingsModal.querySelector('#soundEnabled').checked,
+      autoSave: settingsModal.querySelector('#autoSave').checked,
+      language: settingsModal.querySelector('#language').value
+    };
+
+    StorageManager.setSettings(settings);
+    settingsModal.classList.remove('show');
+    document.body.style.overflow = '';
     this.toastManager.show('Settings saved', 'success', 2000);
 
     // Restart auto-save if setting changed
