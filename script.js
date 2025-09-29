@@ -520,6 +520,7 @@ class TravelAgentChat extends EventEmitter {
     const selectors = {
       // Sidebar elements
       sidebar: '.sidebar',
+      sidebarOverlay: '.sidebar-overlay',
       sidebarToggle: '.sidebar-toggle',
       newChatBtn: '.new-chat-btn',
       quickActions: '.quick-actions',
@@ -580,6 +581,11 @@ class TravelAgentChat extends EventEmitter {
     // Mobile menu toggle
     if (this.elements.mobileMenuToggle) {
       this.elements.mobileMenuToggle.addEventListener('click', () => this.toggleMobileSidebar());
+    }
+
+    // Sidebar overlay (close sidebar when clicked)
+    if (this.elements.sidebarOverlay) {
+      this.elements.sidebarOverlay.addEventListener('click', () => this.closeMobileSidebar());
     }
 
     // New chat button
@@ -652,6 +658,15 @@ class TravelAgentChat extends EventEmitter {
    */
   setupKeyboardEvents() {
     document.addEventListener('keydown', (e) => {
+      // Close mobile sidebar with Escape key
+      if (e.key === 'Escape') {
+        if (this.elements.sidebar && this.elements.sidebar.classList.contains('open')) {
+          e.preventDefault();
+          this.closeMobileSidebar();
+          return;
+        }
+      }
+
       // Sidebar toggle (Ctrl/Cmd + B)
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
@@ -1347,8 +1362,40 @@ class TravelAgentChat extends EventEmitter {
     // Update ARIA attributes
     this.elements.sidebar.setAttribute('aria-expanded', isOpen);
     
+    // Manage overlay
+    if (this.elements.sidebarOverlay) {
+      this.elements.sidebarOverlay.classList.toggle('active', isOpen);
+      this.elements.sidebarOverlay.setAttribute('aria-hidden', !isOpen);
+    }
+    
     // Manage body scroll
     document.body.style.overflow = isOpen ? 'hidden' : '';
+    
+    // Remove collapsed class on mobile to prevent conflicts
+    if (isOpen) {
+      this.elements.sidebar.classList.remove('collapsed');
+    }
+  }
+
+  /**
+   * Close mobile sidebar
+   */
+  closeMobileSidebar() {
+    if (!this.elements.sidebar) return;
+
+    this.elements.sidebar.classList.remove('open');
+    
+    // Update ARIA attributes
+    this.elements.sidebar.setAttribute('aria-expanded', false);
+    
+    // Hide overlay
+    if (this.elements.sidebarOverlay) {
+      this.elements.sidebarOverlay.classList.remove('active');
+      this.elements.sidebarOverlay.setAttribute('aria-hidden', true);
+    }
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
   }
 
   /**
@@ -1843,9 +1890,23 @@ class TravelAgentChat extends EventEmitter {
     // Handle responsive behavior
     const isMobile = window.innerWidth <= 768;
     
-    if (isMobile && this.elements.sidebar && this.elements.sidebar.classList.contains('collapsed')) {
-      // On mobile, don't keep sidebar collapsed
+    if (!this.elements.sidebar) return;
+    
+    if (isMobile) {
+      // On mobile, close sidebar if it's open and remove collapsed state
+      if (this.elements.sidebar.classList.contains('open')) {
+        this.closeMobileSidebar();
+      }
       this.elements.sidebar.classList.remove('collapsed');
+    } else {
+      // On desktop, close mobile sidebar and restore collapsed state if needed
+      if (this.elements.sidebar.classList.contains('open')) {
+        this.closeMobileSidebar();
+      }
+      
+      // Restore collapsed state from localStorage
+      const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+      this.elements.sidebar.classList.toggle('collapsed', isCollapsed);
     }
   }
 
