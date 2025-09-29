@@ -12,7 +12,9 @@
 
 const CONFIG = {
   API: {
-    BASE_URL: 'http://localhost:5001',
+    BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://localhost:5001' 
+      : window.location.origin,
     ENDPOINTS: {
       CHAT: '/api/chat'
     },
