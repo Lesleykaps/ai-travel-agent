@@ -522,6 +522,7 @@ class TravelAgentChat extends EventEmitter {
       sidebar: '.sidebar',
       sidebarOverlay: '.sidebar-overlay',
       sidebarToggle: '.sidebar-toggle',
+      mobileCloseBtn: '.mobile-close-btn',
       newChatBtn: '.new-chat-btn',
       quickActions: '.quick-actions',
       themeToggle: '.theme-toggle',
@@ -581,6 +582,15 @@ class TravelAgentChat extends EventEmitter {
     // Mobile menu toggle
     if (this.elements.mobileMenuToggle) {
       this.elements.mobileMenuToggle.addEventListener('click', () => this.toggleMobileSidebar());
+    }
+
+    // Mobile close button
+    if (this.elements.mobileCloseBtn) {
+      this.elements.mobileCloseBtn.addEventListener('click', () => this.closeMobileSidebar());
+      this.elements.mobileCloseBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        this.closeMobileSidebar();
+      });
     }
 
     // Sidebar overlay (close sidebar when clicked)

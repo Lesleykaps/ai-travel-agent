@@ -316,6 +316,44 @@ body {
   transition: all var(--transition-fast);
 }
 
+.sidebar-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.mobile-close-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  position: relative;
+}
+
+.mobile-close-btn:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  transform: scale(1.05);
+}
+
+.mobile-close-btn:focus {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+.mobile-close-btn:active {
+  transform: scale(0.95);
+  background-color: var(--color-bg-quaternary);
+}
+
 .sidebar-toggle {
   background: none;
   border: none;
@@ -1376,6 +1414,17 @@ body {
   
   .mobile-menu-toggle {
     display: flex;
+  }
+  
+  .mobile-close-btn {
+    display: flex;
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-md);
+  }
+  
+  .sidebar-toggle {
+    display: none;
   }
   
   .chat-header {
